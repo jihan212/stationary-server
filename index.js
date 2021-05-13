@@ -23,7 +23,7 @@ client.connect(err => {
 
 const productCollection = client.db("stationary").collection("product");
 
-app.post('/admin', (req, res) => {
+  app.post('/admin', (req, res) => {
     const newProduct = req.body;
     console.log('Adding new product',newProduct);
     productCollection.insertOne(newProduct)
@@ -40,7 +40,43 @@ app.post('/admin', (req, res) => {
     })
   })
 
+  app.get('/products/:id', (req, res) => {
+    productCollection.find()
+    .toArray((err, items) => {
+      const id = req.params.id;
+      const product = items.find(i=> {
+        return i._id == id
+    })
+      if (!product){
+        return res.status(404).send({message:"not found"})
+      } else {
+        return res.status(200).send(product)
+      }
+    })
+  })
+
+// ---------------- Order collection -------------
+const orderCollection = client.db("stationary").collection("order");
+
+    app.post('/addOrder', (req, res) => {
+      const newOrder = req.body;
+      orderCollection.insertOne(newOrder)
+      .then (result => {
+        console.log(result);
+      })
+      console.log(newOrder);
+    })
+
+    app.get('/order', (req, res) => {
+      console.log(req.query.email);
+      orderCollection.find({email: req.query.email})
+      .toArray((err , documents) => {
+        res.send(documents)
+      })
+    })
+
 });
+// --------------
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`)
   })
